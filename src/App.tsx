@@ -7,6 +7,7 @@ import { HallPage } from './components/HallPage';
 import { HomePage } from './components/HomePage';
 import { SendPage } from './components/SendPage';
 import { randomGift } from './data';
+import { useAmbientMusic } from './hooks/useAmbientMusic';
 import { useWishes } from './hooks/useWishes';
 import type { GiftCard, Page } from './types';
 
@@ -21,6 +22,7 @@ function App() {
   const [page, setPage] = useState<Page>('home');
   const [musicOn, setMusicOn] = useState(false);
   const [gift, setGift] = useState<GiftCard | null>(null);
+  useAmbientMusic(musicOn);
 
   const navItems = useMemo(
     () => [
