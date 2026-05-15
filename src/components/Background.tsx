@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-const particles = Array.from({ length: 48 }, (_, index) => ({
+const particles = Array.from({ length: 28 }, (_, index) => ({
   id: index,
   left: `${(index * 37) % 100}%`,
   top: `${(index * 61) % 100}%`,
@@ -16,17 +16,17 @@ export function Background({ musicOn }: { musicOn: boolean }) {
       <motion.div
         animate={{ rotate: 360 }}
         transition={{ duration: 48, repeat: Infinity, ease: 'linear' }}
-        className="absolute -left-36 top-16 h-80 w-80 rounded-full border border-neonBlue/25"
+        className="absolute -left-36 top-16 h-80 w-80 rounded-full border border-neonBlue/20"
       />
       <motion.div
         animate={{ rotate: -360 }}
         transition={{ duration: 62, repeat: Infinity, ease: 'linear' }}
-        className="absolute -right-24 bottom-10 h-96 w-96 rounded-full border border-candy/20"
+        className="absolute -right-24 bottom-10 h-96 w-96 rounded-full border border-candy/15"
       />
       {particles.map((particle) => (
         <motion.span
           key={particle.id}
-          className="absolute rounded-full bg-white shadow-[0_0_14px_rgba(255,255,255,.8)]"
+          className="absolute rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,.65)]"
           style={{
             left: particle.left,
             top: particle.top,
@@ -34,9 +34,9 @@ export function Background({ musicOn }: { musicOn: boolean }) {
             height: particle.size,
           }}
           animate={{
-            y: [0, -18, 0],
-            opacity: [0.25, 1, 0.25],
-            scale: [1, 1.6, 1],
+            y: [0, -12, 0],
+            opacity: [0.22, 0.85, 0.22],
+            scale: [1, 1.35, 1],
           }}
           transition={{ duration: 3.5 + (particle.id % 5), delay: particle.delay, repeat: Infinity }}
         />

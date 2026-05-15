@@ -5,6 +5,7 @@ import type { Wish } from '../types';
 
 const iconMap = [Star, MessageCircle, Gift, Sparkles];
 const colors = ['border-neonBlue/50 text-neonBlue', 'border-candy/50 text-candy', 'border-warm/50 text-warm'];
+const FLOATING_LIMIT = 36;
 
 export function HallPage({
   wishes,
@@ -25,18 +26,19 @@ export function HallPage({
           const Icon = iconMap[index % iconMap.length];
           const left = 8 + ((index * 23) % 78);
           const top = 10 + ((index * 31) % 74);
+          const shouldFloat = index < FLOATING_LIMIT;
           return (
             <motion.button
               key={wish.id}
               onClick={() => setSelected(wish)}
-              className={`absolute flex max-w-[170px] items-center gap-2 rounded-full border bg-black/35 px-3 py-2 text-left text-sm shadow-neon backdrop-blur-md transition hover:bg-white/10 ${colors[index % colors.length]}`}
+              className={`absolute flex max-w-[170px] items-center gap-2 rounded-full border bg-black/35 px-3 py-2 text-left text-sm shadow-[0_0_16px_rgba(34,211,238,.18)] backdrop-blur-md transition hover:bg-white/10 ${colors[index % colors.length]}`}
               style={{ left: `${left}%`, top: `${top}%` }}
               initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1, y: [0, -10 - (index % 4) * 3, 0] }}
+              animate={shouldFloat ? { opacity: 1, scale: 1, y: [0, -10 - (index % 4) * 3, 0] } : { opacity: 1, scale: 1 }}
               transition={{
                 opacity: { duration: 0.35, delay: index * 0.04 },
                 scale: { duration: 0.35, delay: index * 0.04 },
-                y: { duration: 3.5 + (index % 4), repeat: Infinity, ease: 'easeInOut' },
+                ...(shouldFloat ? { y: { duration: 3.5 + (index % 4), repeat: Infinity, ease: 'easeInOut' } } : {}),
               }}
             >
               <Icon size={18} className="shrink-0" />
