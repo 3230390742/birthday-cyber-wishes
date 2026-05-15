@@ -5,3 +5,4 @@ dist
 .env.*.local
 *.tsbuildinfo
 *.zip
+public/audio/*.mp3

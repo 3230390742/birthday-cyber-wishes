@@ -5,6 +5,7 @@ import { Background } from './components/Background';
 import { GiftPage } from './components/GiftPage';
 import { HallPage } from './components/HallPage';
 import { HomePage } from './components/HomePage';
+import { MusicProgress } from './components/MusicProgress';
 import { SendPage } from './components/SendPage';
 import { randomGift } from './data';
 import { useAmbientMusic } from './hooks/useAmbientMusic';
@@ -22,7 +23,7 @@ function App() {
   const [page, setPage] = useState<Page>('home');
   const [musicOn, setMusicOn] = useState(false);
   const [gift, setGift] = useState<GiftCard | null>(null);
-  useAmbientMusic(musicOn);
+  const music = useAmbientMusic(musicOn);
 
   const navItems = useMemo(
     () => [
@@ -78,14 +79,24 @@ function App() {
             })}
           </nav>
 
-          <button
-            onClick={() => setMusicOn((value) => !value)}
-            className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[0.05] text-neonBlue transition hover:border-neonBlue/60 hover:bg-neonBlue/15"
-            aria-label={musicOn ? '关闭背景音乐' : '开启背景音乐'}
-            title={musicOn ? '关闭背景音乐' : '开启背景音乐'}
-          >
-            {musicOn ? <Music2 size={18} /> : <Music size={18} />}
-          </button>
+          <div className="flex items-center gap-2">
+            {musicOn && (
+              <MusicProgress
+                currentTime={music.currentTime}
+                duration={music.duration}
+                source={music.source}
+                onSeek={music.seek}
+              />
+            )}
+            <button
+              onClick={() => setMusicOn((value) => !value)}
+              className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/[0.05] text-neonBlue transition hover:border-neonBlue/60 hover:bg-neonBlue/15"
+              aria-label={musicOn ? '关闭背景音乐' : '开启背景音乐'}
+              title={musicOn ? '关闭背景音乐' : '开启背景音乐'}
+            >
+              {musicOn ? <Music2 size={18} /> : <Music size={18} />}
+            </button>
+          </div>
         </header>
 
         {(isLoading || error) && (

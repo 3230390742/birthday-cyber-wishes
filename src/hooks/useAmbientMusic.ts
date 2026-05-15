@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const notes = [523.25, 659.25, 783.99, 987.77, 880, 783.99, 659.25, 587.33];
 const musicFile = '/audio/cornfield-chase.mp3';
@@ -64,12 +64,23 @@ function startSynthMusic() {
 }
 
 export function useAmbientMusic(isPlaying: boolean) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [source, setSource] = useState<'track' | 'synth' | 'idle'>('idle');
+
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying) {
+      setCurrentTime(0);
+      setDuration(0);
+      setSource('idle');
+      return;
+    }
 
     let cleanup = () => {};
     let didFallback = false;
     const audio = new Audio(musicFile);
+    audioRef.current = audio;
     audio.loop = true;
     audio.volume = 0.45;
     audio.preload = 'auto';
@@ -77,16 +88,56 @@ export function useAmbientMusic(isPlaying: boolean) {
     function fallbackToSynth() {
       if (didFallback) return;
       didFallback = true;
+      setSource('synth');
+      setCurrentTime(0);
+      setDuration(0);
       cleanup = startSynthMusic();
     }
 
+    function updateProgress() {
+      setCurrentTime(audio.currentTime);
+    }
+
+    function updateDuration() {
+      if (Number.isFinite(audio.duration)) {
+        setDuration(audio.duration);
+      }
+    }
+
+    function markTrackReady() {
+      if (!didFallback) {
+        setSource('track');
+      }
+    }
+
     audio.addEventListener('error', fallbackToSynth);
+    audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('loadedmetadata', updateDuration);
+    audio.addEventListener('durationchange', updateDuration);
+    audio.addEventListener('playing', markTrackReady);
     void audio.play().catch(fallbackToSynth);
 
     return () => {
       audio.pause();
+      audioRef.current = null;
       audio.removeEventListener('error', fallbackToSynth);
+      audio.removeEventListener('timeupdate', updateProgress);
+      audio.removeEventListener('loadedmetadata', updateDuration);
+      audio.removeEventListener('durationchange', updateDuration);
+      audio.removeEventListener('playing', markTrackReady);
       cleanup();
     };
   }, [isPlaying]);
+
+  const seek = useCallback(
+    (nextTime: number) => {
+      const audio = audioRef.current;
+      if (!audio || !duration) return;
+      audio.currentTime = Math.min(duration, Math.max(0, nextTime));
+      setCurrentTime(audio.currentTime);
+    },
+    [duration],
+  );
+
+  return { currentTime, duration, source, seek };
 }
