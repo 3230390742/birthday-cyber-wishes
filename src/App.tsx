@@ -88,7 +88,7 @@ function App() {
 
         {(isLoading || error) && (
           <div className="mb-4 rounded-lg border border-white/10 bg-black/35 px-4 py-3 text-sm text-white/72 shadow-neon backdrop-blur-xl">
-            {isLoading ? '正在同步生日宇宙祝福...' : error}
+            {isLoading ? '正在连接生日祝福服务器...' : error}
           </div>
         )}
 

@@ -1,44 +1,33 @@
 import { useEffect, useMemo, useState } from 'react';
 import { seedWishes } from '../data';
-import { isSupabaseConfigured, supabase, type WishRow } from '../lib/supabase';
 import type { Wish } from '../types';
 
-function toWish(row: WishRow): Wish {
-  return {
-    id: row.id,
-    nickname: row.nickname,
-    message: row.message,
-    type: row.type,
-    createdAt: row.created_at,
-  };
-}
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
 export function useWishes() {
   const [wishes, setWishes] = useState<Wish[]>(seedWishes);
-  const [isLoading, setIsLoading] = useState(isSupabaseConfigured);
-  const [error, setError] = useState<string | null>(
-    isSupabaseConfigured ? null : '还没有配置 Supabase URL 和 publishable key，当前显示的是示例祝福。',
-  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!supabase) return;
-
     async function loadWishes() {
       setIsLoading(true);
-      const { data, error: loadError } = await supabase!
-        .from('wishes')
-        .select('*')
-        .order('created_at', { ascending: false });
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/wishes`);
+        const payload = await response.json();
 
-      if (loadError) {
-        setError(loadError.message);
-        setWishes(seedWishes);
-      } else {
+        if (!response.ok) {
+          throw new Error(payload?.error ?? '读取祝福失败。');
+        }
+
         setError(null);
-        setWishes(data.map(toWish));
+        setWishes(payload);
+      } catch (loadError) {
+        setError(loadError instanceof Error ? loadError.message : '读取祝福失败。');
+        setWishes(seedWishes);
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     }
 
     void loadWishes();
@@ -47,35 +36,26 @@ export function useWishes() {
   const energy = useMemo(() => Math.min(100, wishes.length * 12), [wishes.length]);
 
   async function addWish(wish: Omit<Wish, 'id' | 'createdAt'>) {
-    if (!supabase) {
-      const newWish: Wish = {
-        ...wish,
-        id: crypto.randomUUID(),
-        createdAt: new Date().toISOString(),
-      };
-      setWishes((current) => [newWish, ...current]);
-      return newWish;
-    }
-
-    const { data, error: insertError } = await supabase
-      .from('wishes')
-      .insert({
+    const response = await fetch(`${API_BASE_URL}/api/wishes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         nickname: wish.nickname,
         message: wish.message,
         type: wish.type,
-      })
-      .select('*')
-      .single();
+      }),
+    });
+    const payload = await response.json();
 
-    if (insertError) {
-      setError(insertError.message);
-      throw insertError;
+    if (!response.ok) {
+      const message = payload?.error ?? '提交祝福失败。';
+      setError(message);
+      throw new Error(message);
     }
 
-    const newWish = toWish(data);
-    setWishes((current) => [newWish, ...current]);
+    setWishes((current) => [payload, ...current]);
     setError(null);
-    return newWish;
+    return payload as Wish;
   }
 
   return { wishes, energy, addWish, isLoading, error };

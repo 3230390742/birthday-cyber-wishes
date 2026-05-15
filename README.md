@@ -24,13 +24,21 @@ npm run build
 
 生日倒计时默认日期在 `src/data.ts` 的 `BIRTHDAY_TARGET` 中修改。
 
-## Supabase 后端配置
+## 后端代理配置
 
-复制 `.env.example` 为 `.env.local`，填入 Supabase 项目的 URL 和 publishable key：
+前端默认请求同域名下的 `/api/wishes`。服务器端需要配置 Supabase URL 和服务端 key：
 
-```env
-VITE_SUPABASE_URL=你的 Supabase Project URL
-VITE_SUPABASE_ANON_KEY=你的 Supabase publishable key
+```bash
+SUPABASE_URL=https://你的项目ref.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=你的 Supabase 服务端 key
+PORT=3001
 ```
 
-不要把 `sb_secret_...` 服务端密钥放进前端项目。
+不要把 `SUPABASE_SERVICE_ROLE_KEY` 放进前端环境变量、GitHub 或 Vercel。
+
+本地开发时可以开两个终端：
+
+```bash
+npm run server
+npm run dev
+```
