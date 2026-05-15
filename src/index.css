@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, "Microsoft YaHei", system-ui, sans-serif;
+  color-scheme: dark;
+  background: #070816;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: #070816;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  background: #070816;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.35);
+}
+
+@media (max-width: 640px) {
+  body {
+    overflow-x: hidden;
+  }
+}
