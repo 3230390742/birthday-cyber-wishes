@@ -4,6 +4,17 @@ import type { Wish } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
+async function readJsonResponse(response: Response) {
+  const text = await response.text();
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`服务器返回了非 JSON 内容，HTTP 状态码 ${response.status}。`);
+  }
+}
+
 export function useWishes() {
   const [wishes, setWishes] = useState<Wish[]>(seedWishes);
   const [isLoading, setIsLoading] = useState(true);
@@ -14,14 +25,14 @@ export function useWishes() {
       setIsLoading(true);
       try {
         const response = await fetch(`${API_BASE_URL}/api/wishes`);
-        const payload = await response.json();
+        const payload = await readJsonResponse(response);
 
         if (!response.ok) {
           throw new Error(payload?.error ?? '读取祝福失败。');
         }
 
         setError(null);
-        setWishes(payload);
+        setWishes(Array.isArray(payload) ? payload : []);
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : '读取祝福失败。');
         setWishes(seedWishes);
@@ -45,7 +56,7 @@ export function useWishes() {
         type: wish.type,
       }),
     });
-    const payload = await response.json();
+    const payload = await readJsonResponse(response);
 
     if (!response.ok) {
       const message = payload?.error ?? '提交祝福失败。';
